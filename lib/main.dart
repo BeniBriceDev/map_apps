@@ -2,16 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps/pages/name.dart';
 import 'package:google_maps/pages/routes.dart';
-import 'package:google_maps/services/init.dart';
 
-Future<void> main() async {
-  await InitData().initServices;
+void main() {
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-  
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {

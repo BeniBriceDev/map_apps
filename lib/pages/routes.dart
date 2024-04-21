@@ -5,7 +5,6 @@ import 'package:google_maps/views/custom_marker.dart';
 import 'package:google_maps/views/gps_apps.dart';
 import 'package:google_maps/views/landing_page.dart';
 import 'package:google_maps/views/map_demo.dart';
-import 'package:google_maps/views/map_view.dart';
 
 class AllRouteName {
   static List<GetPage> allPage = [
@@ -14,11 +13,11 @@ class AllRouteName {
       page: () => const MapSample(),
       binding: HomeBindings(),
     ),
-    GetPage(
-      name: AllPageName.mapview,
-      page: () => const MapViewPage(),
-      binding: HomeBindings(),
-    ),
+    // GetPage(
+    //   name: AllPageName.mapview,
+    //   page: () {},
+    //   binding: HomeBindings(),
+    // ),
     GetPage(
       name: AllPageName.gpsPage,
       page: () => const GpsApp(),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
-import 'package:google_maps/camera/google_util.dart';
+import 'package:google_maps/controller/google_util.dart';
 import 'package:google_maps/controller/landing_controller.dart';
 import 'package:google_maps/data/app_data.dart';
 import 'package:google_maps/pages/name.dart';

@@ -1,9 +1,7 @@
 // import 'package:flutter/foundation.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
-import 'package:google_maps/camera/google_util.dart';
+import 'package:google_maps/controller/google_util.dart';
 import 'package:google_maps/controller/landing_controller.dart';
 import 'package:google_maps/widget/map_widget.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -45,12 +43,23 @@ class _CustomMarkerState extends State<CustomMarker> {
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.pop(context, 'Cancel'),
-              child: const Text('Cancel'),
+              child: const Text(
+                'Cancel',
+              ),
             ),
             TextButton(
               onPressed: () {
                 Get.snackbar(
-                  duration: const Duration(seconds: 2),
+                  backgroundColor: const Color.fromARGB(
+                    255,
+                    46,
+                    44,
+                    44,
+                  ),
+                  colorText: Colors.white,
+                  duration: const Duration(
+                    seconds: 2,
+                  ),
                   'Confirmation',
                   'Location change avec succes',
                 );
@@ -104,7 +113,13 @@ class _CustomMarkerState extends State<CustomMarker> {
               },
             )
           : GoogleMap(
-              initialCameraPosition: cameraPosition.kGooglePlex,
+              initialCameraPosition: CameraPosition(
+                target: LatLng(
+                  landingController.latitude.value!,
+                  landingController.longitude.value!,
+                ),
+                zoom: 14.4746,
+              ),
               onTap: (argument) {
                 openDialog(argument, context);
               },
@@ -112,9 +127,7 @@ class _CustomMarkerState extends State<CustomMarker> {
               onMapCreated: (controller) {
                 try {
                   // cameraPosition.ycontroller.complete(controller);
-                } on StateError {
-                  print('continue');
-                }
+                } on StateError {}
               },
               // adding marker
               markers: {
@@ -134,18 +147,12 @@ class _CustomMarkerState extends State<CustomMarker> {
             ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {},
-        child: Container(
-          child: Column(
-            children: [
-              IconButton(
-                onPressed: () {
-                  changeView();
-                },
-                icon: const Icon(
-                  Icons.remove_red_eye,
-                ),
-              ),
-            ],
+        child: IconButton(
+          onPressed: () {
+            changeView();
+          },
+          icon: const Icon(
+            Icons.remove_red_eye,
           ),
         ),
       ),
