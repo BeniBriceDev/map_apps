@@ -132,6 +132,10 @@ class _LandingpageState extends State<Landingpage> {
                         _currentPosition?.latitude;
                     landingController.longitude.value =
                         _currentPosition?.longitude;
+                    landingController.stateLatitude.value =
+                        _currentPosition?.latitude;
+                    landingController.stateLongitude.value =
+                        _currentPosition?.longitude;
                   }
 
                   landingController.isFirstRun.value = false;

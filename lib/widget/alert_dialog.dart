@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:google_maps/controller/landing_controller.dart';
 import 'package:google_maps/views/custom_marker.dart';
@@ -69,7 +68,7 @@ class ShowDialog extends GetxController {
           titlePadding: EdgeInsets.all(3),
           contentPadding: EdgeInsets.all(8),
 
-          content: CustomMarker(),
+          content: customMarker,
           // Scaffold(
 
           //   body: Stack(

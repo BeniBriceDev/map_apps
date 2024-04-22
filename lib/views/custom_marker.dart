@@ -1,9 +1,8 @@
-// import 'package:flutter/foundation.dart';
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_maps/controller/google_util.dart';
 import 'package:google_maps/controller/landing_controller.dart';
-import 'package:google_maps/widget/map_widget.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class CustomMarker extends StatefulWidget {
@@ -13,9 +12,15 @@ class CustomMarker extends StatefulWidget {
   State<CustomMarker> createState() => _CustomMarkerState();
 }
 
-class _CustomMarkerState extends State<CustomMarker> {
+class _CustomMarkerState extends State<CustomMarker>
+    with TickerProviderStateMixin {
   final landingController = Get.put(LandingContoller());
+  final Completer<GoogleMapController> _controller =
+      Completer<GoogleMapController>();
+
   bool hybridView = true;
+  bool showDialoge = false;
+
   void changeView() {
     setState(() {
       if (hybridView) {
@@ -26,12 +31,17 @@ class _CustomMarkerState extends State<CustomMarker> {
     });
   }
 
+  void showDialogText() {
+    if (showDialoge) {
+      showDialoge = true;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(GoogleUtil());
-    final mapWidget = MapWidget();
-    final cameraPosition = GoogleUtil();
+    final height = MediaQuery.of(context).size.height / 1.3;
 
+    LatLng? arguments;
     Future<String?> openDialog(LatLng argument, BuildContext context) {
       return showDialog<String>(
         context: context,
@@ -66,7 +76,6 @@ class _CustomMarkerState extends State<CustomMarker> {
                 landingController.latitude.value = argument.latitude;
                 landingController.longitude.value = argument.longitude;
 
-                Navigator.pop(context);
                 setState(() {});
               },
               child: const Text('OK'),
@@ -76,87 +85,181 @@ class _CustomMarkerState extends State<CustomMarker> {
       );
     }
 
-    return Scaffold(
-      body: hybridView
-          ? GoogleMap(
-              initialCameraPosition: CameraPosition(
-                target: LatLng(
-                  landingController.latitude.value!,
-                  landingController.longitude.value!,
-                ),
-                zoom: 14.4746,
+    onTapUpdate(LatLng argument) {
+      landingController.stateLatitude.value = argument.latitude;
+      landingController.stateLongitude.value = argument.longitude;
+
+      setState(() {});
+      setState(() {
+        arguments = argument;
+        showDialoge = true;
+      });
+      setState(() {});
+      print(arguments!.latitude);
+    }
+
+    CameraPosition cameraPosition() {
+      return CameraPosition(
+        target: LatLng(
+          landingController.stateLatitude.value!,
+          landingController.stateLongitude.value!,
+        ),
+        zoom: 14.4746,
+      );
+    }
+
+    Future<void> changeLocation() async {
+      final GoogleMapController controller = await _controller.future;
+      await controller
+          .animateCamera(CameraUpdate.newCameraPosition(cameraPosition()));
+    }
+
+    List<Widget> bottomNav() {
+      return [
+        Align(
+          alignment: Alignment.bottomLeft,
+          child: Row(
+            children: [
+              IconButton(
+                onPressed: () => changeView(),
+                icon: const Icon(Icons.remove_red_eye),
               ),
-
-              mapType: MapType.hybrid,
-              onMapCreated: (controller) {
-                // cameraPosition.ycontroller.complete(controller);
-              },
-              onTap: ((argument) {
-                openDialog(argument, context);
-              }),
-
-              // adding marker
-              markers: {
-                Marker(
-                  markerId: const MarkerId('marchantLoc'),
-                  draggable: true,
-                  onDrag: (value) {},
-                  position: LatLng(
-                    landingController.latitude.value!,
-                    landingController.longitude.value!,
-                  ),
-                  infoWindow: const InfoWindow(
-                    title: 'Marchant Location',
-                    snippet: "Marchant zone",
-                  ),
-                ),
-              },
-            )
-          : GoogleMap(
-              initialCameraPosition: CameraPosition(
-                target: LatLng(
-                  landingController.latitude.value!,
-                  landingController.longitude.value!,
-                ),
-                zoom: 14.4746,
+              IconButton(
+                onPressed: () {
+                  setState(() {
+                    landingController.stateLatitude.value =
+                        landingController.latitude.value;
+                    landingController.stateLongitude.value =
+                        landingController.longitude.value;
+                  });
+                  changeLocation();
+                },
+                icon: const Icon(Icons.location_on),
               ),
-              onTap: (argument) {
-                openDialog(argument, context);
-              },
-
-              onMapCreated: (controller) {
-                try {
-                  // cameraPosition.ycontroller.complete(controller);
-                } on StateError {}
-              },
-              // adding marker
-              markers: {
-                Marker(
-                  markerId: const MarkerId('marchantLoc'),
-                  draggable: true,
-                  position: LatLng(
-                    landingController.latitude.value!,
-                    landingController.longitude.value!,
-                  ),
-                  infoWindow: const InfoWindow(
-                    title: 'Marchant Location',
-                    snippet: "Marchant zone",
-                  ),
-                ),
-              },
-            ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        child: IconButton(
-          onPressed: () {
-            changeView();
-          },
-          icon: const Icon(
-            Icons.remove_red_eye,
+            ],
           ),
         ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+        Align(
+          alignment: Alignment.bottomRight,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    showDialoge = false;
+                  });
+                },
+                child: const Text('Annuler'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Get.snackbar(
+                    backgroundColor: const Color.fromARGB(
+                      255,
+                      46,
+                      44,
+                      44,
+                    ),
+                    colorText: Colors.white,
+                    duration: const Duration(
+                      seconds: 2,
+                    ),
+                    'Confirmation',
+                    'Location change avec succes',
+                  );
+                  landingController.latitude.value =
+                      landingController.stateLatitude.value;
+                  landingController.longitude.value =
+                      landingController.stateLongitude.value;
+
+                  Navigator.pop(context);
+                },
+                child: const Text('Confirmer'),
+              ),
+            ],
+          ),
+        )
+      ];
+    }
+
+    return Scaffold(
+      body: hybridView
+          ? Stack(
+              children: [
+                bottomNav()[0],
+                showDialoge ? bottomNav()[1] : Container(),
+                SizedBox(
+                  height: height,
+                  width: 300,
+                  child: GoogleMap(
+                    initialCameraPosition: cameraPosition(),
+                    mapType: MapType.hybrid,
+                    onMapCreated: (controller) {
+                      _controller.complete(controller);
+                    },
+                    onTap: ((argument) => onTapUpdate(argument)),
+
+                    // adding marker
+                    markers: {
+                      Marker(
+                        markerId: const MarkerId('marchantLoc'),
+                        draggable: true,
+                        onDrag: (value) {},
+                        position: LatLng(
+                          landingController.stateLatitude.value!,
+                          landingController.stateLongitude.value!,
+                        ),
+                        infoWindow: const InfoWindow(
+                          title: 'Marchant Location',
+                          snippet: "Marchant zone",
+                        ),
+                      ),
+                    },
+                  ),
+                ),
+              ],
+            )
+          : Stack(
+              children: [
+                bottomNav()[0],
+                showDialoge ? bottomNav()[1] : Container(),
+                SizedBox(
+                  height: height,
+                  child: GoogleMap(
+                    initialCameraPosition: CameraPosition(
+                      target: LatLng(
+                        landingController.stateLatitude.value!,
+                        landingController.stateLongitude.value!,
+                      ),
+                      zoom: 14.4746,
+                    ),
+                    onTap: (argument) => onTapUpdate(argument),
+
+                    onMapCreated: (controller) {
+                      try {
+                        // cameraPosition.ycontroller.complete(controller);
+                      } on StateError {}
+                    },
+                    // adding marker
+                    markers: {
+                      Marker(
+                        markerId: const MarkerId('marchantLoc'),
+                        draggable: true,
+                        position: LatLng(
+                          landingController.stateLatitude.value!,
+                          landingController.stateLongitude.value!,
+                        ),
+                        infoWindow: const InfoWindow(
+                          title: 'Marchant Location',
+                          snippet: "Marchant zone",
+                        ),
+                      ),
+                    },
+                  ),
+                ),
+              ],
+            ),
     );
   }
 }

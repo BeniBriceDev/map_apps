@@ -8,6 +8,9 @@ class LandingContoller extends GetxController {
   final _currentAdress = ''.obs;
   final latitude = Rx<double?>(0.0);
   final longitude = Rx<double?>(0.0);
+
+  final stateLatitude = Rx<double?>(0.0);
+  final stateLongitude = Rx<double?>(0.0);
   final marker = Rx<Set<Marker>>({});
   final hybridView = false.obs;
 
